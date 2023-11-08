@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="../lib/bootstrap.css">
+    <link rel="stylesheet" href="../lib/bootstrap-icons/bootstrap-icons.css">
+  </head>
+  <body>
+    <div class="container-fluid bg-body-secondary m-auto">
+      <div class="row">
+          <button type="button" id="add_current_page" class="col m-1 btn btn-secondary bi bi-journal-plus" data-bs-toggle="tooltip" title="Add current page"></button>
+          <button type="button" id="new_page" class="col m-1 btn btn-secondary bi bi-plus" data-bs-toggle="tooltip" title="Add new page"></button>
+          <button type="button" id="keyboard_shortcut" class="col  m-1 btn btn-secondary bi bi-keyboard" data-bs-toggle="tooltip" title="Open Keyboard Shortcut"></button>
+      </div>
+      <div class="row">
+        <div class="col p-1 align-middle">
+          <div class="input-group">
+            <input type="text" id="shortcut" class="form-control" placeholder="" aria-label="key">
+          </div>
+        </div>
+      </div>
+      <div class="row item-container">
+        <!-- List of items -->
+        <div id="shortcut-list" class="list-group p-0">
+          <span id="template-shortcut-li">
+            
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <a href="#" id="template-view" class="list-group-item list-group-item-action">
+      <div class="">
+        <span class="fw-bold key">Key</span>
+        <button type="button" class="edit-button btn btn-secondary bi bi-gear float-end" title="Edit"></button>
+      </div>
+      <div class="">
+        <span class="title">Title</span>
+      </div>
+    </a>
+
+    <form id="template-edit" class="m-1 border-1" novalidate>
+      <div class="form-group m-auto">
+        <label for="key">Key</label>
+        <input type="text" class="form-control" id="key" aria-describedby="key" placeholder="Enter Key" required>
+      </div>
+      <div class="form-group m-auto">
+        <label for="title">Title</label>
+        <input type="text" class="form-control" id="title" placeholder="Enter Title" required>
+      </div>
+      <div class="form-group">
+        <label for="url">URL</label>
+        <input type="url" class="form-control" id="url" placeholder="Enter URL" required>
+      </div>
+      <div class="form-group m-1 float-end">
+        <button type="button" id="delete-button" class="btn btn-danger bi bi-trash"></button>
+        <button type="button" id="cancel-button" class="btn btn-secondary bi bi-x"></button>
+        <button type="submit" id="submit-button" class="save-button btn btn-secondary bi bi-check" disabled></button>
+      </div>
+    </form>
+    
+    <script src="../lib/jquery.js"></script>
+    <script src="../lib/popper.min.js"></script>
+    <script src="../lib/bootstrap.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
