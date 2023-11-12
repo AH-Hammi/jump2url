@@ -28,12 +28,21 @@
           </span>
         </div>
       </div>
+      <div class="row">
+        <div class="container-fluid">
+          <div class="m-1 float-end">
+            <button type="button" id="export-shortcuts" class="btn btn-secondary bi bi-journal-arrow-up" data-bs-toggle="tooltip" title="Export Settings"></button>
+            <input type="file" accept=".json" name="import-shortcuts" id="import-shortcuts-input" class="form-control" hidden/>
+            <button type="button" id="import-shortcuts" class="btn btn-secondary bi bi-journal-arrow-down" data-bs-toggle="tooltip" title="Import Settings"></button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <a href="#" id="template-view" class="list-group-item list-group-item-action">
       <div class="">
         <span class="fw-bold key">Key</span>
-        <button type="button" class="edit-button btn btn-secondary bi bi-gear float-end" title="Edit"></button>
+        <button type="button" class="edit-button btn btn-secondary bi bi-gear float-end" data-bs-toggle="tooltip" title="Edit"></button>
       </div>
       <div class="">
         <span class="title">Title</span>
@@ -53,10 +62,20 @@
         <label for="url">URL</label>
         <input type="url" class="form-control" id="url" placeholder="Enter URL" required>
       </div>
-      <div class="form-group m-1 float-end">
-        <button type="button" id="delete-button" class="btn btn-danger bi bi-trash"></button>
-        <button type="button" id="cancel-button" class="btn btn-secondary bi bi-x"></button>
-        <button type="submit" id="submit-button" class="save-button btn btn-secondary bi bi-check" disabled></button>
+      <div class="form-group m-1">
+        <div class="switch-button">
+          <input type="checkbox" name="storage" class="switch checkbox"></input>
+          <div class="knobs">
+            <div class="text-white bi bi-globe no-option m-1 p-1"> Online</div>
+            <div class="text-white bi bi-hdd yes-option m-1 p-1"> Offline</div>
+          </div>
+          <div class="layer btn btn-primary" style="transition: 0.3s ease all;"></div>
+        </div>
+      </div>
+      <div class="form-group float-end">
+        <button type="button" id="delete-button" class="btn btn-danger bi bi-trash" data-bs-toggle="tooltip" title="Remove"></button>
+        <button type="button" id="cancel-button" class="btn btn-secondary bi bi-x" data-bs-toggle="tooltip" title="Cancel"></button>
+        <button type="submit" id="submit-button" class="save-button btn btn-secondary bi bi-check" title="Save" disabled></button>
       </div>
     </form>
     

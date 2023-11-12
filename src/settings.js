@@ -19,13 +19,17 @@ class Settings {
     return settings;
   }
 
+  // return the data
   data() {
     return {
       shortcutKeys: this._shortcutKeys
     };
   }
 
-  validate_key(key) {
+  // validate new key
+  unique_key(key) {
+    console.log("Checking if key is unique");
+    console.log("key: ", key);
     // check if the key is valid
     if (this._shortcutKeys.find((item) => {
       return item.key == key;
@@ -33,55 +37,70 @@ class Settings {
       console.log("Key already exists");
       return false;
     }
-    
+    return true;
+  }
+
+  // validate the key
+  validate_key(key, old_key) {
+    console.log("Validating key");
+    console.log("key: ", key);
+    console.log("old_key: ", old_key);
     // check if the key is empty
     if (key == "") {
       console.log("Key is empty");
       return false;
     }
-
+    // check if the key is unique if it is different from the old key
+    if (key != old_key && !this.unique_key(key)) {
+      console.log("Key is not unique");
+      return false;
+    }
     return true;
   }
 
-  // validate the data
+  // validate the title
   validate_title(title) {
     // check if the title is empty
     if (title == "") {
       console.log("Title is empty");
       return false;
     }
-
     return true;
   }
 
+  // validate the url
   validate_url(url) {
     // check if the url is empty
     if (url == "") {
       console.log("URL is empty");
       return false;
     }
+    return true;
+  }
 
+  validate_data(settings) {
+    if (!this.validate_key(settings.key)) {
+      return false;
+    }
+    if (!this.validate_title(settings.title)) {
+      return false;
+    }
+    if (!this.validate_url(settings.url)) {
+      return false;
+    }
     return true;
   }
 
   // Update one key
   async update(settings) {
+    // check if the data is valid
+    if (!this.validate_data(settings)) {
+      return;
+    }
+
     // check if old_key is empty and a new key needs to be added
     if (settings.old_key == "") {
-      // check if the key is valid
-      if (!this.validate_key(settings.key)) {
-        return;
-      }
-
-      if(settings.url == "") {
-        console.log("URL is empty");
-        return;
-      }
-
-      if (settings.title == "") {
-        settings.title = settings.url;
-      }
-
+      console.log("Adding new key");
       // add new data
       this._shortcutKeys.push({
         key: settings.key,
@@ -97,15 +116,11 @@ class Settings {
     const shortcutKey = this._shortcutKeys.find((item) => {
       return item.key == settings.old_key;
     });
-    if(!this.validate_key(settings.key)) {
+    console.log("shortcutKey: ", shortcutKey);
+    // check if the key is not found
+    if (!shortcutKey) {
+      console.log("Key not found, cannot update");
       return;
-    }
-    if(settings.url == "") {
-      console.log("URL is empty");
-      return;
-    }
-    if (settings.title == "") {
-      settings.title = settings.url;
     }
     // update the data
     shortcutKey.key = settings.key;

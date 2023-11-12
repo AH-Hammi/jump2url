@@ -52,7 +52,7 @@ Settings.newAsync().then((settings) => {
       case 'background-validate':
         // Message name is 'validate' only
         sendResponse({
-          key: settings.validate_key(message.key),
+          key: settings.validate_key(message.key, message.old_key),
           title: settings.validate_title(message.title),
           url: settings.validate_url(message.url),
         });
