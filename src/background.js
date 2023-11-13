@@ -27,29 +27,28 @@ function jump2url(url) {
 
 Settings.newAsync().then((settings) => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log(message);
-    switch(message.target) {
-      case 'background-settings':
-        if (message.name == 'load') {
+    console.log("message: ", message);
+    switch (message.target) {
+      case "background-settings":
+        if (message.name == "load") {
           // load
-          // sendResponse(settings.data());
           settings.reload().then(() => {
             sendResponse(settings.data());
           });
-        } else if (message.name == 'update') {
+        } else if (message.name == "update") {
           // save
           settings.update(message.settings).then(() => {
             sendResponse();
           });
-        } else if (message.name == 'delete') {
+        } else if (message.name == "delete") {
           // delete
           settings.delete(message.key).then(() => {
             sendResponse();
           });
         }
         return true;
-      
-      case 'background-validate':
+
+      case "background-validate":
         // Message name is 'validate' only
         sendResponse({
           key: settings.validate_key(message.key, message.old_key),
@@ -58,42 +57,40 @@ Settings.newAsync().then((settings) => {
         });
         return;
 
-      case 'background-options':
+      case "background-options":
         // Message name is 'add' only
         addCurrentPage();
         return;
 
-      case 'background-shortcuts':
+      case "background-shortcuts":
         // Message name is 'open' only
-        chrome.tabs.create({url: 'chrome://extensions/shortcuts'});
+        chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
         return;
 
-      case 'background-jump':
+      case "background-jump":
         // Message name is 'jump' only
         jump2url(message.url);
         return;
-      }
+    }
   });
 
-  const addCurrentPage = function() {
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+  const addCurrentPage = function () {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       const tab = tabs[0];
       chrome.runtime.openOptionsPage(() => {
         // It takes time to open the option page
         setTimeout(() => {
-          chrome.runtime.sendMessage(
-            {
-              target: 'options',
-              name: 'add',
-              data: {
-                title: tab.title,
-                action: ActionId.JUMP_URL,
-                url: tab.url
-              }
-            });
-          },
-          500);
+          chrome.runtime.sendMessage({
+            target: "options",
+            name: "add",
+            data: {
+              title: tab.title,
+              action: ActionId.JUMP_URL,
+              url: tab.url,
+            },
+          });
+        }, 500);
       });
     });
-  }
+  };
 });

@@ -4,6 +4,7 @@ class Shortcut {
     this.title = data.title;
     this.url = data.url;
     this.key = data.key;
+    this.sync = data.sync;
     this.$target = $target;
     this.$view_template = $view_template;
     this.$edit_template = $edit_template;
@@ -36,9 +37,9 @@ class Shortcut {
       if (!response.key) {
         // check if the key is the same as before
         // if (!(this.key === this.$target.find("#key").val())) {
-          // key is the same as before
-          this.$target.find("#key").addClass("is-invalid");
-          invalid = true;
+        // key is the same as before
+        this.$target.find("#key").addClass("is-invalid");
+        invalid = true;
         // }
       }
       if (!response.title) {
@@ -58,7 +59,8 @@ class Shortcut {
       if (
         this.key === this.$target.find("#key").val() &&
         this.title === this.$target.find("#title").val() &&
-        this.url === this.$target.find("#url").val()
+        this.url === this.$target.find("#url").val() &&
+        this.sync === this.$target.find("#sync").is(":checked")
       ) {
         // disable submit button
         this.$target.find("#submit-button").attr("disabled", true);
@@ -84,7 +86,7 @@ class Shortcut {
     });
     // add click event listener to edit button
     var edit_button = this.$target.find(".edit-button");
-    this.edit_tooltip = new bootstrap.Tooltip(edit_button,{
+    this.edit_tooltip = new bootstrap.Tooltip(edit_button, {
       title: "Edit",
       placement: "bottom",
       trigger: "hover",
@@ -105,6 +107,7 @@ class Shortcut {
     this.$target.find("#key").val(this.key);
     this.$target.find("#title").val(this.title);
     this.$target.find("#url").val(this.url);
+    this.$target.find("#sync").prop("checked", this.sync);
     //! Validate input on changed input event
     this.$target.find("#key").on("input", (e) => {
       this.$target.find("#key").removeClass("is-invalid");
@@ -118,6 +121,9 @@ class Shortcut {
       this.$target.find("#url").removeClass("is-invalid");
       this.validate();
     });
+    this.$target.find("#sync").on("input", (e) => {
+      this.validate();
+    });
 
     var form = this.$target.find("form");
     // catch submit event
@@ -127,7 +133,7 @@ class Shortcut {
       this.key = this.$target.find("#key").val();
       this.title = this.$target.find("#title").val();
       this.url = this.$target.find("#url").val();
-      this.render_view();
+      this.sync = this.$target.find("#sync").is(":checked");
       var request = {
         target: "background-settings",
         name: "update",
@@ -136,9 +142,11 @@ class Shortcut {
           key: this.key,
           title: this.title,
           url: this.url,
+          sync: this.sync,
         },
       };
       chrome.runtime.sendMessage(request, () => {});
+      this.render_view();
       return false;
     });
     // add click event listener to submit button
@@ -201,27 +209,35 @@ class Shortcut {
       behavior: "instant",
     });
 
-    var $layer = this.$target.find('.layer');
-      var $switch = this.$target.find('.switch');
-      var $no_option = this.$target.find('.no-option');
-      var $yes_option = this.$target.find('.yes-option');
-      var $knobs = this.$target.find('.knobs');
+    var $layer = this.$target.find(".layer");
+    var $switch = this.$target.find(".switch");
+    var $no_option = this.$target.find(".no-option");
+    var $yes_option = this.$target.find(".yes-option");
+    var $knobs = this.$target.find(".knobs");
 
-      // Enable Switch Button functionality
-      $layer.css('width', $('.no-option').outerWidth(true));
-      $layer.css('margin-left', "0px");
-      // Set height of layer to height of switch-button
-      $layer.css('height', $knobs.outerHeight(true));
+    // Enable Switch Button functionality
+    $layer.css("width", $(".no-option").outerWidth(true));
+    $layer.css("margin-left", "0px");
+    // Set height of layer to height of switch-button
+    $layer.css("height", $knobs.outerHeight(true));
 
-      $switch.change(() => {
-        if ($switch.is(':checked')) {
-          $layer.css('width', $yes_option.outerWidth(true));
-          $layer.css('margin-left', $yes_option.position().left);
-        } else {
-          $layer.css('width', $no_option.outerWidth(true));
-          $layer.css('margin-left', $no_option.position().left);
-        }
-      });
+    $switch.change(() => {
+      if ($switch.is(":checked")) {
+        $layer.css("width", $yes_option.outerWidth(true));
+        $layer.css("margin-left", $yes_option.position().left);
+      } else {
+        $layer.css("width", $no_option.outerWidth(true));
+        $layer.css("margin-left", $no_option.position().left);
+      }
+    });
+
+    if ($switch.is(":checked")) {
+      $layer.css("width", $yes_option.outerWidth(true));
+      $layer.css("margin-left", $yes_option.position().left);
+    } else {
+      $layer.css("width", $no_option.outerWidth(true));
+      $layer.css("margin-left", $no_option.position().left);
+    }
 
     // make input character uppercase
     this.$target.find("#key").on("input", (e) => {
@@ -246,6 +262,7 @@ class Shortcut {
       title: this.title,
       url: this.url,
       key: this.key,
+      sync: this.sync,
     };
   }
 }
@@ -585,10 +602,14 @@ function render(shortcuts) {
     };
     chrome.runtime.sendMessage(request, (response) => {
       console.log(response);
-      const downloadLink = document.createElement('a');
-      downloadLink.download = 'shortcutkeys.json';
-      downloadLink.href = URL.createObjectURL(new Blob([JSON.stringify(response.shortcutKeys, null, 2)], { 'type': 'text/plain' }));
-      downloadLink.setAttribute('hidden', true);
+      const downloadLink = document.createElement("a");
+      downloadLink.download = "shortcut_keys.json";
+      downloadLink.href = URL.createObjectURL(
+        new Blob([JSON.stringify(response.shortcut_keys, null, 2)], {
+          type: "text/plain",
+        })
+      );
+      downloadLink.setAttribute("hidden", true);
 
       document.body.appendChild(downloadLink);
       downloadLink.click();
@@ -606,9 +627,9 @@ function render(shortcuts) {
       const fileContents = e.target.result;
 
       try {
-        const importShortcutKeys = JSON.parse(fileContents);
-        console.log(importShortcutKeys);
-        importShortcutKeys.forEach((shortcutKey) => {
+        const import_shortcut_keys = JSON.parse(fileContents);
+        console.log(import_shortcut_keys);
+        import_shortcut_keys.forEach((shortcutKey) => {
           // make request to backend to add shortcut
           var request = {
             target: "background-settings",
@@ -618,15 +639,16 @@ function render(shortcuts) {
               key: shortcutKey.key,
               title: shortcutKey.title,
               url: shortcutKey.url,
+              sync: shortcutKey.sync,
             },
           };
           chrome.runtime.sendMessage(request, () => {});
         });
       } catch (error) {
         console.log(error);
-        alert('Could not import due to invalid format.');
+        alert("Could not import due to invalid format.");
       }
-    }
+    };
     reader.readAsText(file);
     // close popup
     window.close();
@@ -645,15 +667,12 @@ function render(shortcuts) {
   });
 
   // create tooltip for add current page button
-  var add_current_page_tooltip = new bootstrap.Tooltip(
-    $("#add_current_page"),
-    {
-      title: "Add current page",
-      placement: "bottom",
-      trigger: "hover",
-      animation: false,
-    }
-  );
+  var add_current_page_tooltip = new bootstrap.Tooltip($("#add_current_page"), {
+    title: "Add current page",
+    placement: "bottom",
+    trigger: "hover",
+    animation: false,
+  });
   // create tooltip for add new page button
   var add_new_page_tooltip = new bootstrap.Tooltip($("#new_page"), {
     title: "Add new page",
@@ -685,25 +704,25 @@ function render(shortcuts) {
     trigger: "hover",
     animation: false,
   });
-  
-  $('.layer').css('width', $('.no-option').outerWidth(true));
-  $('.layer').css('margin-left', "0px");
-  // Set height of layer to height of switch-button
-  $('.layer').css('height', $('.knobs').outerHeight(true));
 
-  $('#switch-label').change(function() {
-      if ($(this).is(':checked')) {
-          $('.layer').css('width', $('.yes-option').outerWidth(true));
-          $('.layer').css('margin-left', $('.yes-option').position().left);
-      } else {
-          $('.layer').css('width', $('.no-option').outerWidth(true));
-          $('.layer').css('margin-left', $('.no-option').position().left);
-      }
+  $(".layer").css("width", $(".no-option").outerWidth(true));
+  $(".layer").css("margin-left", "0px");
+  // Set height of layer to height of switch-button
+  $(".layer").css("height", $(".knobs").outerHeight(true));
+
+  $("#switch-label").change(function () {
+    if ($(this).is(":checked")) {
+      $(".layer").css("width", $(".yes-option").outerWidth(true));
+      $(".layer").css("margin-left", $(".yes-option").position().left);
+    } else {
+      $(".layer").css("width", $(".no-option").outerWidth(true));
+      $(".layer").css("margin-left", $(".no-option").position().left);
+    }
   });
 }
 
-// while response does not contain shortcutKeys, try again
-var shortcutKeys = [];
+// while response does not contain shortcut_keys, try again
+var shortcut_keys = [];
 
 var tries = 0;
 var max_tries = 10;
@@ -711,10 +730,10 @@ var interval = setInterval(() => {
   chrome.runtime.sendMessage(
     { target: "background-settings", name: "load" },
     (response) => {
-      if (response.shortcutKeys) {
-        shortcutKeys = response.shortcutKeys;
+      if (response.shortcut_keys) {
+        shortcut_keys = response.shortcut_keys;
         clearInterval(interval);
-        render(shortcutKeys);
+        render(shortcut_keys);
       }
       tries++;
       if (tries >= max_tries) {
