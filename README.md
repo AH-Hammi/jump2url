@@ -1,21 +1,7 @@
-# <img src="public/icons/icon_48.png" width="45" align="left"> Jump2url
+# jump2url
 
-My Chrome Extension
-
-## Features
-
-- Feature 1
-- Feature 2
-
-## Install
-
-[**Chrome** extension]()
+This chrome extension provides the ability to jump to a url by typing a keyword.
 
 ## Contribution
 
 Suggestions and pull requests are welcomed!.
-
----
-
-This project was bootstrapped with [Chrome Extension CLI](https://github.com/dutiyesh/chrome-extension-cli)
-
