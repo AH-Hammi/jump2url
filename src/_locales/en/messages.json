@@ -1,4 +1,6 @@
 {
-  "extensionName": { "message": "ShortcutKey2URL for Chrome" },
-  "extensionDescription": { "message": "ShortcutKey2URL provide a shortcut key to easily access frequently visit sites." }
+  "extensionName": { "message": "jump2url" },
+  "extensionDescription": {
+    "message": "jump2url provides the ability to jump to a url by typing a keyword in the address bar."
+  }
 }

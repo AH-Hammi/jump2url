@@ -246,8 +246,12 @@ class Settings {
     console.log("Saving shortcut keys: ", this._shortcut_keys);
 
     // split the shortcutKeys into sync and local and deep copy them
-    let sync_keys = JSON.parse(JSON.stringify(this._shortcut_keys.filter((item) => item.sync)));
-    let local_keys = JSON.parse(JSON.stringify(this._shortcut_keys.filter((item) => !item.sync)));
+    let sync_keys = JSON.parse(
+      JSON.stringify(this._shortcut_keys.filter((item) => item.sync))
+    );
+    let local_keys = JSON.parse(
+      JSON.stringify(this._shortcut_keys.filter((item) => !item.sync))
+    );
     // remove the sync property
     sync_keys.forEach((item) => {
       delete item.sync;

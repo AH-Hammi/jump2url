@@ -177,6 +177,7 @@ class Shortcut {
       document.getElementById("shortcut").focus();
       return false;
     });
+
     if (is_new) {
       // if it is a new shortcut, disable the delete button
       this.$target.find("#delete-button").attr("disabled", true);
@@ -215,11 +216,19 @@ class Shortcut {
     var $yes_option = this.$target.find(".yes-option");
     var $knobs = this.$target.find(".knobs");
 
-    // Enable Switch Button functionality
-    $layer.css("width", $(".no-option").outerWidth(true));
-    $layer.css("margin-left", "0px");
     // Set height of layer to height of switch-button
     $layer.css("height", $knobs.outerHeight(true));
+
+    if ($switch.is(":checked")) {
+      $layer.css("width", $yes_option.outerWidth(true));
+      $layer.css("margin-left", $yes_option.position().left);
+    } else {
+      $layer.css("width", $no_option.outerWidth(true));
+      $layer.css("margin-left", $no_option.position().left);
+    }
+
+    // add transition to layer
+    $layer.css("transition", "all 0.2s ease");
 
     $switch.change(() => {
       if ($switch.is(":checked")) {
@@ -230,14 +239,6 @@ class Shortcut {
         $layer.css("margin-left", $no_option.position().left);
       }
     });
-
-    if ($switch.is(":checked")) {
-      $layer.css("width", $yes_option.outerWidth(true));
-      $layer.css("margin-left", $yes_option.position().left);
-    } else {
-      $layer.css("width", $no_option.outerWidth(true));
-      $layer.css("margin-left", $no_option.position().left);
-    }
 
     // make input character uppercase
     this.$target.find("#key").on("input", (e) => {
@@ -271,7 +272,7 @@ class Shortcut {
 class ShortcutList {
   constructor($target, shortcuts) {
     this.$target = $target;
-    this.shortcuts = shortcuts;
+    this.shortcuts = [];
     this.active_index = -1;
     this.viewable_shortcuts = [];
     this.command_tooltips = {
@@ -305,9 +306,23 @@ class ShortcutList {
       }
     );
     this.command_tooltips_active = false;
+    this.append_list(shortcuts);
   }
 
   append(shortcut) {
+    this._append(shortcut);
+    this.render_filtered($("#shortcut").val());
+  }
+
+  append_list(shortcuts) {
+    for (const shortcut of shortcuts) {
+      this._append(shortcut);
+    }
+    // render filtered shortcuts
+    this.render_filtered($("#shortcut").val());
+  }
+
+  _append(shortcut) {
     this.shortcuts.push(shortcut);
     this.viewable_shortcuts.push(shortcut);
     this.$target.append(shortcut.$target);
@@ -323,13 +338,11 @@ class ShortcutList {
         animation: false,
       }
     );
-    shortcut.render_view();
-    this.set_active(0);
   }
 
   // add list item at index 0
   prepend(shortcut) {
-    this.append(shortcut);
+    this._append(shortcut);
     this.$target.prepend(shortcut.$target);
   }
 
@@ -389,7 +402,7 @@ class ShortcutList {
     this.reset_active();
     // filter shortcuts
     const filtered_shortcuts = this.shortcuts.filter((shortcut) => {
-      return shortcut.key.toUpperCase().includes(filter.toUpperCase());
+      return shortcut.key.toUpperCase().startsWith(filter.toUpperCase());
     });
     // render shortcuts
     this.$target.empty();
@@ -460,18 +473,17 @@ $edit_template.remove();
 
 function render(shortcuts) {
   //? Render shortcuts
-  const shortcut_list = new ShortcutList($shortcut_list, []);
-  for (const shortcut of shortcuts) {
-    // create shortcut object
-    const shortcut_object = new Shortcut(
-      shortcut,
-      $li_template.clone(),
-      $view_template.clone(),
-      $edit_template.clone()
-    );
-    // append shortcut to list
-    shortcut_list.append(shortcut_object);
-  }
+  const shortcut_list = new ShortcutList(
+    $shortcut_list,
+    shortcuts.map((shortcut) => {
+      return new Shortcut(
+        shortcut,
+        $li_template.clone(),
+        $view_template.clone(),
+        $edit_template.clone()
+      );
+    })
+  );
 
   //? Add event listener
   // listen for keydown events on the input element for shortcuts
@@ -530,9 +542,15 @@ function render(shortcuts) {
     }
   });
 
+  // listen on focus lost on #shortcut
+  $("#shortcut").on("blur", function (e) {
+    // hide keyboard commands
+    shortcut_list.hide_keyboard_commands();
+  });
+
   // listen for click events on the keyboard icon
   $("#keyboard_shortcut").on("click", () => {
-    // chrome.tabs.create({url: 'chrome://extensions/shortcuts'});
+    chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
     return false;
   });
 
