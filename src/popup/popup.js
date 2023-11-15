@@ -1,5 +1,54 @@
-// Represent a shortcut
+/**
+ * Render the toggle button.
+ *
+ * @param {jQuery} $target - The target element containing the toggle button.
+ * @return {void} This function does not return a value.
+ */
+function toggle_button_render($target) {
+  var $layer = $target.find(".layer");
+  var $switch = $target.find(".switch");
+  var $no_option = $target.find(".no-option");
+  var $yes_option = $target.find(".yes-option");
+
+  // check if the switch is checked
+  if ($switch.is(":checked")) {
+    // set layer behind the yes option
+    $layer.css("width", $yes_option.outerWidth());
+    $layer.css("height", $yes_option.outerHeight());
+    $layer.css("left", $yes_option.position().left);
+    $layer.css("top", $yes_option.position().top);
+    $yes_option.addClass("text-white");
+    $no_option.removeClass("text-white");
+  } else {
+    // set layer behind the no option
+    $layer.css("width", $no_option.outerWidth());
+    $layer.css("height", $no_option.outerHeight());
+    $layer.css("left", $no_option.position().left);
+    $layer.css("top", $no_option.position().top);
+    $no_option.addClass("text-white");
+    $yes_option.removeClass("text-white");
+  }
+
+  // set transition
+  $layer.css("transition", "0.2s ease all");
+  $no_option.css("transition", "0.2s ease all");
+  $yes_option.css("transition", "0.2s ease all");
+}
+
+/**
+ * Shortcut class
+ *
+ * @class
+ */
 class Shortcut {
+  /**
+   * Constructor function for creating an instance of the class.
+   *
+   * @param {data} data - The data object containing the properties for the instance.
+   * @param {jQuery} $target - The target element where the instance will be rendered.
+   * @param {string} $view_template - The HTML template for the view mode of the instance.
+   * @param {string} $edit_template - The HTML template for the edit mode of the instance.
+   */
   constructor(data, $target, $view_template, $edit_template) {
     this.title = data.title;
     this.url = data.url;
@@ -11,7 +60,11 @@ class Shortcut {
     this.edit_tooltip = null;
   }
 
-  // jumps to the url
+  /**
+   * Jumps to a specified URL and closes the window.
+   *
+   * @return {void} No return value.
+   */
   jump() {
     // open the url
     chrome.runtime.sendMessage(
@@ -21,6 +74,12 @@ class Shortcut {
     window.close();
   }
 
+  /**
+   * Validate the input by asking the backend for validation.
+   * If the input is invalid, add is-invalid to the input.
+   *
+   * @return {void} No return value.
+   */
   validate() {
     // ask the backend to validate the input
     var invalid = false;
@@ -72,7 +131,11 @@ class Shortcut {
     });
   }
 
-  // render the shortcut
+  /**
+   * Renders the view.
+   *
+   * @return {void} No return value.
+   */
   render_view() {
     this.$target.empty();
     // clone template
@@ -100,8 +163,10 @@ class Shortcut {
     // add tooltip to edit button
   }
 
-  // render the shortcut in edit mode
-  render_edit(is_new = false) {
+  /**
+   * Renders the edit form.
+   */
+  render_edit() {
     this.$target.empty();
     this.$target.append(this.$edit_template);
     this.$target.find("#key").val(this.key);
@@ -167,7 +232,7 @@ class Shortcut {
     cancel_button.on("click", () => {
       // cancel editing the shortcut
       cancel_tooltip.hide();
-      if (is_new) {
+      if (this.key === "") {
         // delete the shortcut
         this.$target.remove();
         return false;
@@ -178,7 +243,7 @@ class Shortcut {
       return false;
     });
 
-    if (is_new) {
+    if (this.key === "") {
       // if it is a new shortcut, disable the delete button
       this.$target.find("#delete-button").attr("disabled", true);
     } else {
@@ -205,59 +270,53 @@ class Shortcut {
 
     // scroll to show the edit field at the top
     this.$target[0].scrollIntoView({
-      block: "start",
+      block: "nearest",
       inline: "nearest",
-      behavior: "instant",
+      behavior: "smooth",
     });
 
-    var $layer = this.$target.find(".layer");
-    var $switch = this.$target.find(".switch");
-    var $no_option = this.$target.find(".no-option");
-    var $yes_option = this.$target.find(".yes-option");
-    var $knobs = this.$target.find(".knobs");
+    toggle_button_render(this.$target);
 
-    // Set height of layer to height of switch-button
-    $layer.css("height", $knobs.outerHeight(true));
-
-    if ($switch.is(":checked")) {
-      $layer.css("width", $yes_option.outerWidth(true));
-      $layer.css("margin-left", $yes_option.position().left);
-    } else {
-      $layer.css("width", $no_option.outerWidth(true));
-      $layer.css("margin-left", $no_option.position().left);
-    }
-
-    // add transition to layer
-    $layer.css("transition", "all 0.2s ease");
-
-    $switch.change(() => {
-      if ($switch.is(":checked")) {
-        $layer.css("width", $yes_option.outerWidth(true));
-        $layer.css("margin-left", $yes_option.position().left);
-      } else {
-        $layer.css("width", $no_option.outerWidth(true));
-        $layer.css("margin-left", $no_option.position().left);
-      }
+    this.$target.find(".switch").change(() => {
+      toggle_button_render(this.$target);
     });
 
     // make input character uppercase
     this.$target.find("#key").on("input", (e) => {
       e.target.value = e.target.value.toUpperCase();
     });
+
     // Focus to first input element
     this.$target.find("#key").focus();
   }
 
-  // set the view to active
+  /**
+   * Sets the active state of the element.
+   *
+   * @return {void}
+   */
   set_active() {
     this.$view_template.addClass("active");
   }
 
-  // set the view to inactive
+  /**
+   * Sets the element as inactive by removing the "active" class from the view template.
+   *
+   * @return {void}
+   */
   set_inactive() {
     this.$view_template.removeClass("active");
   }
 
+  /**
+   * Returns an object containing the current values of the title, url, key, and sync properties.
+   *
+   * @return {object} An object with the following properties:
+   *                  - title: The title property value
+   *                  - url: The url property value
+   *                  - key: The key property value
+   *                  - sync: The sync property value
+   */
   data() {
     return {
       title: this.title,
@@ -270,6 +329,12 @@ class Shortcut {
 
 // a list over all shortcuts holding the ul element as well as all shortcut elements
 class ShortcutList {
+  /**
+   * Initializes a new instance of the Constructor class.
+   *
+   * @param {Object} $target - The target element.
+   * @param {Array} shortcuts - The array of shortcuts.
+   */
   constructor($target, shortcuts) {
     this.$target = $target;
     this.shortcuts = [];
@@ -309,11 +374,21 @@ class ShortcutList {
     this.append_list(shortcuts);
   }
 
+  /**
+   * Append a shortcut to the list.
+   *
+   * @param {object} shortcut - Shortcut object to append.
+   */
   append(shortcut) {
     this._append(shortcut);
     this.render_filtered($("#shortcut").val());
   }
 
+  /**
+   * Appends a list of shortcuts.
+   *
+   * @param {Array} shortcuts - The list of shortcuts to be appended.
+   */
   append_list(shortcuts) {
     for (const shortcut of shortcuts) {
       this._append(shortcut);
@@ -322,6 +397,11 @@ class ShortcutList {
     this.render_filtered($("#shortcut").val());
   }
 
+  /**
+   * Appends a shortcut to the list of shortcuts and updates the view.
+   *
+   * @param {Shortcut} shortcut - The shortcut to be appended.
+   */
   _append(shortcut) {
     this.shortcuts.push(shortcut);
     this.viewable_shortcuts.push(shortcut);
@@ -340,13 +420,22 @@ class ShortcutList {
     );
   }
 
-  // add list item at index 0
+  /**
+   * Prepend a shortcut to the list.
+   *
+   * @param {shortcut} shortcut - The shortcut to prepend.
+   * @return {void} This function does not return a value.
+   */
   prepend(shortcut) {
     this._append(shortcut);
     this.$target.prepend(shortcut.$target);
   }
 
-  // sets the shortcut at the given index as active
+  /**
+   * Set the active shortcut at the specified index.
+   *
+   * @param {number} index - The index of the shortcut to set as active.
+   */
   set_active(index) {
     // check if index is valid
     if (index < 0 || index >= this.viewable_shortcuts.length) {
@@ -358,6 +447,11 @@ class ShortcutList {
     this.active_index = index;
   }
 
+  /**
+   * Resets the active shortcut.
+   *
+   * @return {void}
+   */
   reset_active() {
     if (this.viewable_shortcuts.length === 0) {
       return;
@@ -369,7 +463,11 @@ class ShortcutList {
     this.active_index = -1;
   }
 
-  // select the next shortcut
+  /**
+   * Selects the next shortcut and sets it as active.
+   *
+   * @return {void} No return value.
+   */
   next() {
     const next_index = (this.active_index + 1) % this.viewable_shortcuts.length;
     // scroll down if the next shortcut is not visible
@@ -382,7 +480,11 @@ class ShortcutList {
     this.set_active(next_index);
   }
 
-  // select the previous shortcut
+  /**
+   * Selects the previous shortcut and sets it as active.
+   *
+   * @return {void}
+   */
   previous() {
     const previous_index =
       (this.active_index - 1 + this.viewable_shortcuts.length) %
@@ -397,7 +499,11 @@ class ShortcutList {
     this.set_active(previous_index);
   }
 
-  // render the list with the given filter
+  /**
+   * Renders the filtered shortcuts based on the provided filter.
+   *
+   * @param {string} filter - The filter to apply to the shortcuts.
+   */
   render_filtered(filter) {
     this.reset_active();
     // filter shortcuts
@@ -416,7 +522,9 @@ class ShortcutList {
     this.set_active(0);
   }
 
-  // Open the selected shortcut
+  /**
+   * jump_selected function - Checks if there is a selected shortcut and jumps to it.
+   */
   jump_selected() {
     // check if there is a selected shortcut
     if (this.active_index === -1) {
@@ -425,6 +533,9 @@ class ShortcutList {
     this.viewable_shortcuts[this.active_index].jump();
   }
 
+  /**
+   * Hides all keyboard commands.
+   */
   hide_keyboard_commands() {
     // hide all tooltips
     this.command_tooltips["add_current_page"].hide();
@@ -437,6 +548,9 @@ class ShortcutList {
     this.command_tooltips_active = false;
   }
 
+  /**
+   * Shows all keyboard commands.
+   */
   show_keyboard_commands() {
     // show all tooltips
     this.command_tooltips["add_current_page"].show();
@@ -459,16 +573,19 @@ const $shortcut_list = $("#shortcut-list");
 //? Load list item template
 const $li_template = $("#template-shortcut-li");
 // remove template from DOM
+$li_template.attr("id", "");
 $li_template.remove();
 
 //? Load view template
 const $view_template = $("#template-view");
 // remove template from DOM
+$view_template.attr("id", "");
 $view_template.remove();
 
 //? Load edit template
 const $edit_template = $("#template-edit");
 // remove template from DOM
+$edit_template.attr("id", "");
 $edit_template.remove();
 
 function render(shortcuts) {
@@ -572,7 +689,7 @@ function render(shortcuts) {
     // append shortcut to list
     shortcut_list.prepend(shortcut_object);
     // render shortcut
-    shortcut_object.render_edit(true);
+    shortcut_object.render_edit();
     return false;
   });
 
@@ -594,13 +711,13 @@ function render(shortcuts) {
     // append shortcut to list
     shortcut_list.prepend(shortcut_object);
     // render shortcut
-    shortcut_object.render_edit(true);
+    shortcut_object.render_edit();
     // get current tab
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       // set url to current tab
       shortcut_object.url = tabs[0].url;
       shortcut_object.title = tabs[0].title;
-      shortcut_object.render_edit(true);
+      shortcut_object.render_edit();
       // generate key from uppercase letters in title
       // fill key to input field
       shortcut_object.$target
