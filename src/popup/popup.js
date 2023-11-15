@@ -33,6 +33,8 @@ function toggle_button_render($target) {
   $layer.css("transition", "0.2s ease all");
   $no_option.css("transition", "0.2s ease all");
   $yes_option.css("transition", "0.2s ease all");
+
+  window.scrollTo(0, 0);
 }
 
 /**
@@ -41,6 +43,9 @@ function toggle_button_render($target) {
  * @class
  */
 class Shortcut {
+  // keep track of how many instances have been created
+  static count = 0;
+
   /**
    * Constructor function for creating an instance of the class.
    *
@@ -58,6 +63,8 @@ class Shortcut {
     this.$view_template = $view_template;
     this.$edit_template = $edit_template;
     this.edit_tooltip = null;
+    this.id = Shortcut.count;
+    Shortcut.count++;
   }
 
   /**
@@ -119,7 +126,7 @@ class Shortcut {
         this.key === this.$target.find("#key").val() &&
         this.title === this.$target.find("#title").val() &&
         this.url === this.$target.find("#url").val() &&
-        this.sync === this.$target.find("#sync").is(":checked")
+        this.sync === this.$target.find("#sync-" + this.id).is(":checked")
       ) {
         // disable submit button
         this.$target.find("#submit-button").attr("disabled", true);
@@ -169,24 +176,34 @@ class Shortcut {
   render_edit() {
     this.$target.empty();
     this.$target.append(this.$edit_template);
-    this.$target.find("#key").val(this.key);
-    this.$target.find("#title").val(this.title);
-    this.$target.find("#url").val(this.url);
-    this.$target.find("#sync").prop("checked", this.sync);
+    // give switch input a unique id
+    let $key = this.$target.find("#key");
+    let $title = this.$target.find("#title");
+    let $url = this.$target.find("#url");
+    let $sync = this.$target.find("#sync");
+
+    $sync.attr("id", "sync-" + this.id);
+    // find all labels looking for sync
+    this.$target.find("label[for=sync]").attr("for", "sync-" + this.id);
+
+    $key.val(this.key);
+    $title.val(this.title);
+    $url.val(this.url);
+    $sync.prop("checked", this.sync);
     //! Validate input on changed input event
-    this.$target.find("#key").on("input", (e) => {
+    $key.on("input", (e) => {
       this.$target.find("#key").removeClass("is-invalid");
       this.validate();
     });
-    this.$target.find("#title").on("input", (e) => {
+    $title.on("input", (e) => {
       this.$target.find("#title").removeClass("is-invalid");
       this.validate();
     });
-    this.$target.find("#url").on("input", (e) => {
+    $url.on("input", (e) => {
       this.$target.find("#url").removeClass("is-invalid");
       this.validate();
     });
-    this.$target.find("#sync").on("input", (e) => {
+    $sync.on("input", (e) => {
       this.validate();
     });
 
@@ -838,21 +855,6 @@ function render(shortcuts) {
     placement: "left",
     trigger: "hover",
     animation: false,
-  });
-
-  $(".layer").css("width", $(".no-option").outerWidth(true));
-  $(".layer").css("margin-left", "0px");
-  // Set height of layer to height of switch-button
-  $(".layer").css("height", $(".knobs").outerHeight(true));
-
-  $("#switch-label").change(function () {
-    if ($(this).is(":checked")) {
-      $(".layer").css("width", $(".yes-option").outerWidth(true));
-      $(".layer").css("margin-left", $(".yes-option").position().left);
-    } else {
-      $(".layer").css("width", $(".no-option").outerWidth(true));
-      $(".layer").css("margin-left", $(".no-option").position().left);
-    }
   });
 }
 
