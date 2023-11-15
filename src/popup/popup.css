@@ -7,38 +7,26 @@ body {
   max-height: 400px;
 }
 
-.switch-button {
+label:has(> .no-option) {
   position: relative;
-  /* background-color: var(--bs-secondary); */
-}
-
-.checkbox {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 3;
-}
-
-.knobs {
-  position: absolute;
-  overflow: visible;
-  z-index: 2;
-  /* outline: 1px solid black; */
-  padding: 0px;
-  margin: 0px;
-}
-
-.knobs * {
-  display: inline-block;
 }
 
 /* Layer is behind the knobs, depending on the checkbox with the color red*/
 .layer {
-  z-index: 10;
-  margin: 0px;
-  padding: 0px;
+  position: absolute;
+  left: 0px;
+  z-index: 1;
+  border-radius: var(--bs-border-radius);
+}
+
+.no-option {
+  position: relative;
+  top: 0px;
+  z-index: 2;
+}
+
+.yes-option {
+  position: relative;
+  top: 0px;
+  z-index: 2;
 }
