@@ -76,9 +76,10 @@ class Shortcut {
     // open the url
     chrome.runtime.sendMessage(
       { target: "background-jump", name: "jump", url: this.url },
-      () => {}
+      () => {
+        window.close();
+      }
     );
-    window.close();
   }
 
   /**
@@ -774,10 +775,9 @@ function render(shortcuts) {
     console.log(e);
     const file = e.target.files[0];
 
-    const reader = new FileReader();
+    let reader = new FileReader();
     reader.onload = (e) => {
       const fileContents = e.target.result;
-
       try {
         const import_shortcut_keys = JSON.parse(fileContents);
         console.log(import_shortcut_keys);
@@ -800,10 +800,10 @@ function render(shortcuts) {
         console.log(error);
         alert("Could not import due to invalid format.");
       }
+      // close popup
+      window.close();
     };
     reader.readAsText(file);
-    // close popup
-    window.close();
   });
 
   // listen for click events on the import button
