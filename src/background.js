@@ -4,7 +4,7 @@ function jump2url(url) {
   // First, search from the current window.
   chrome.tabs.query({ lastFocusedWindow: true }, (tabs) => {
     const matchTab = tabs.filter((tab) => {
-      return tab.url.indexOf(url) == 0;
+      return tab.url.indexOf(url) === 0;
     })[0];
     if (matchTab) {
       chrome.tabs.update(matchTab.id, { active: true }, () => {});
@@ -12,7 +12,7 @@ function jump2url(url) {
       // Second, search from all windows.
       chrome.tabs.query({}, (tabs) => {
         const matchTab = tabs.filter((tab) => {
-          return tab.url.indexOf(url) == 0;
+          return tab.url.indexOf(url) === 0;
         })[0];
         if (matchTab) {
           chrome.windows.update(matchTab.windowId, { focused: true });
@@ -30,17 +30,17 @@ Settings.newAsync().then((settings) => {
     console.log("message: ", message);
     switch (message.target) {
       case "background-settings":
-        if (message.name == "load") {
+        if (message.name === "load") {
           // load
           settings.reload().then(() => {
             sendResponse(settings.data());
           });
-        } else if (message.name == "update") {
+        } else if (message.name === "update") {
           // save
           settings.update(message.settings).then(() => {
             sendResponse();
           });
-        } else if (message.name == "delete") {
+        } else if (message.name === "delete") {
           // delete
           settings.delete(message.key).then(() => {
             sendResponse();
@@ -74,8 +74,8 @@ Settings.newAsync().then((settings) => {
     }
   });
 
-  const addCurrentPage = function () {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  const addCurrentPage = () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const tab = tabs[0];
       chrome.runtime.openOptionsPage(() => {
         // It takes time to open the option page

@@ -37,8 +37,6 @@ const DEFAULT_SHORTCUT_KEYS = [
   },
 ];
 
-const DEFAULT_LIST_COLUMN_COUNT = 3;
-
 class Settings {
   static async newAsync() {
     const settings = new Settings();
@@ -61,7 +59,7 @@ class Settings {
     // check if the key is valid
     if (
       this._shortcut_keys.find((item) => {
-        return item.key == key;
+        return item.key === key;
       })
     ) {
       console.log("Key already exists");
@@ -76,12 +74,12 @@ class Settings {
     console.log("key: ", key);
     console.log("old_key: ", old_key);
     // check if the key is empty
-    if (key == "") {
+    if (key === "") {
       console.log("Key is empty");
       return false;
     }
     // check if the key is unique if it is different from the old key
-    if (key != old_key && !this.unique_key(key)) {
+    if (key !== old_key && !this.unique_key(key)) {
       console.log("Key is not unique");
       return false;
     }
@@ -91,7 +89,7 @@ class Settings {
   // validate the title
   validate_title(title) {
     // check if the title is empty
-    if (title == "") {
+    if (title === "") {
       console.log("Title is empty");
       return false;
     }
@@ -101,7 +99,7 @@ class Settings {
   // validate the url
   validate_url(url) {
     // check if the url is empty
-    if (url == "") {
+    if (url === "") {
       console.log("URL is empty");
       return false;
     }
@@ -132,7 +130,7 @@ class Settings {
     }
 
     // check if old_key is empty and a new key needs to be added
-    if (settings.old_key == "") {
+    if (settings.old_key === "") {
       console.log("Adding new key");
       // add new data
       this._shortcut_keys.push({
@@ -148,7 +146,7 @@ class Settings {
 
     // find the data to update
     const shortcut_key = this._shortcut_keys.find((item) => {
-      return item.key == settings.old_key;
+      return item.key === settings.old_key;
     });
     // check if the key is not found
     if (!shortcut_key) {
@@ -170,7 +168,7 @@ class Settings {
   async delete(key) {
     // find the data to delete
     const shortcut_key = this._shortcut_keys.find((item) => {
-      return item.key == key;
+      return item.key === key;
     });
 
     // if not found, return
@@ -195,9 +193,9 @@ class Settings {
 
     // add the sync property
     if (localKeys) {
-      localKeys.forEach((item) => {
+      for (const item of localKeys) {
         item.sync = false;
-      });
+      }
     } else {
       localKeys = [];
     }
@@ -210,13 +208,13 @@ class Settings {
       // go through each shard
       for (let i = 0; i < number_of_shards; i++) {
         // get the shard
-        let shard = await get_sync_storage("shortcut_keys_shard" + i);
+        let shard = await get_sync_storage(`shortcut_keys_shard${i}`);
         // check if the shard is empty
         if (shard) {
           // add the sync property
-          shard.forEach((item) => {
+          for (const item of shard) {
             item.sync = true;
-          });
+          }
         } else {
           shard = [];
         }
@@ -229,7 +227,7 @@ class Settings {
     // combine the local and sync keys
     this._shortcut_keys = localKeys.concat(syncKeys);
     // if there are no keys, use the default keys
-    if (this._shortcut_keys.length == 0) {
+    if (this._shortcut_keys.length === 0) {
       this._shortcut_keys = DEFAULT_SHORTCUT_KEYS;
     }
     // sort the keys
@@ -246,25 +244,25 @@ class Settings {
     console.log("Saving shortcut keys: ", this._shortcut_keys);
 
     // split the shortcutKeys into sync and local and deep copy them
-    let sync_keys = JSON.parse(
+    const sync_keys = JSON.parse(
       JSON.stringify(this._shortcut_keys.filter((item) => item.sync))
     );
     let local_keys = JSON.parse(
       JSON.stringify(this._shortcut_keys.filter((item) => !item.sync))
     );
     // remove the sync property
-    sync_keys.forEach((item) => {
-      delete item.sync;
-    });
-    local_keys.forEach((item) => {
-      delete item.sync;
-    });
+    for (const item of sync_keys) {
+      item.sync = undefined;
+    }
+    for (const item of local_keys) {
+      item.sync = undefined;
+    }
     console.log("local_keys: ", local_keys);
     console.log("sync_keys: ", sync_keys);
 
     // split syncKeys into individual items each being at most 8KB
     // list of shards
-    let sync_shard_list = [];
+    const sync_shard_list = [];
 
     // shard of shortcut_keys
     let sync_key_shard = [];
@@ -299,7 +297,7 @@ class Settings {
       for (let i = 0; i < sync_shard_list.length; i++) {
         const item = sync_shard_list[i];
         // save the list to sync storage
-        await set_sync_storage({ ["shortcut_keys_shard" + i]: item });
+        await set_sync_storage({ [`shortcut_keys_shard${i}`]: item });
       }
       // save the number of lists to sync storage
       await set_sync_storage({ number_of_shards: sync_shard_list.length });
