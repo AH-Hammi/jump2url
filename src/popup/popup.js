@@ -389,6 +389,26 @@ class ShortcutList {
       }
     );
     this.command_tooltips_active = false;
+
+    // create fuse object
+    this.fuse = new Fuse(this.shortcuts, {
+      isCaseSensitive: false,
+      keys: [
+        {
+          name: "key",
+          weight: 0.7,
+        },
+        {
+          name: "title",
+          weight: 0.5,
+        },
+        {
+          name: "url",
+          weight: 0.3,
+        },
+      ],
+    });
+
     this.append_list(shortcuts);
   }
 
@@ -436,6 +456,7 @@ class ShortcutList {
         animation: false,
       }
     );
+    this.fuse.setCollection(this.shortcuts);
   }
 
   /**
@@ -524,10 +545,12 @@ class ShortcutList {
    */
   render_filtered(filter) {
     this.reset_active();
-    // filter shortcuts
-    const filtered_shortcuts = this.shortcuts.filter((shortcut) => {
-      return shortcut.key.toUpperCase().startsWith(filter.toUpperCase());
-    });
+    // if the filter is empty, render all shortcuts
+    let filtered_shortcuts = this.shortcuts;
+    if (!(filter === "")) {
+      // filter shortcuts, return the array as a list of the item in the array
+      filtered_shortcuts = this.fuse.search(filter).map((item) => item.item);
+    }
     // render shortcuts
     this.$target.empty();
     this.viewable_shortcuts = [];
