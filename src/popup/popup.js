@@ -5,10 +5,10 @@
  * @return {void} This function does not return a value.
  */
 function toggle_button_render($target) {
-  var $layer = $target.find(".layer");
-  var $switch = $target.find(".switch");
-  var $no_option = $target.find(".no-option");
-  var $yes_option = $target.find(".yes-option");
+  const $layer = $target.find(".layer");
+  const $switch = $target.find(".switch");
+  const $no_option = $target.find(".no-option");
+  const $yes_option = $target.find(".yes-option");
 
   // check if the switch is checked
   if ($switch.is(":checked")) {
@@ -90,8 +90,8 @@ class Shortcut {
    */
   validate() {
     // ask the backend to validate the input
-    var invalid = false;
-    var request = {
+    let invalid = false;
+    const request = {
       target: "background-validate",
       name: "validate",
       old_key: this.key,
@@ -127,7 +127,7 @@ class Shortcut {
         this.key === this.$target.find("#key").val() &&
         this.title === this.$target.find("#title").val() &&
         this.url === this.$target.find("#url").val() &&
-        this.sync === this.$target.find("#sync-" + this.id).is(":checked")
+        this.sync === this.$target.find(`#sync-${this.id}`).is(":checked")
       ) {
         // disable submit button
         this.$target.find("#submit-button").attr("disabled", true);
@@ -156,7 +156,7 @@ class Shortcut {
       return false;
     });
     // add click event listener to edit button
-    var edit_button = this.$target.find(".edit-button");
+    const edit_button = this.$target.find(".edit-button");
     this.edit_tooltip = new bootstrap.Tooltip(edit_button, {
       title: "Edit",
       placement: "bottom",
@@ -178,14 +178,14 @@ class Shortcut {
     this.$target.empty();
     this.$target.append(this.$edit_template);
     // give switch input a unique id
-    let $key = this.$target.find("#key");
-    let $title = this.$target.find("#title");
-    let $url = this.$target.find("#url");
-    let $sync = this.$target.find("#sync");
+    const $key = this.$target.find("#key");
+    const $title = this.$target.find("#title");
+    const $url = this.$target.find("#url");
+    const $sync = this.$target.find("#sync");
 
-    $sync.attr("id", "sync-" + this.id);
+    $sync.attr("id", `sync-${this.id}`);
     // find all labels looking for sync
-    this.$target.find("label[for=sync]").attr("for", "sync-" + this.id);
+    this.$target.find("label[for=sync]").attr("for", `sync-${this.id}`);
 
     $key.val(this.key);
     $title.val(this.title);
@@ -208,16 +208,16 @@ class Shortcut {
       this.validate();
     });
 
-    var form = this.$target.find("form");
+    const form = this.$target.find("form");
     // catch submit event
     form.on("submit", (e) => {
       // save the shortcut
-      var old_key = this.key;
+      const old_key = this.key;
       this.key = this.$target.find("#key").val();
       this.title = this.$target.find("#title").val();
       this.url = this.$target.find("#url").val();
       this.sync = this.$target.find("#sync").is(":checked");
-      var request = {
+      const request = {
         target: "background-settings",
         name: "update",
         settings: {
@@ -233,9 +233,9 @@ class Shortcut {
       return false;
     });
     // add click event listener to submit button
-    var submit_button = this.$target.find("#submit-button");
+    const submit_button = this.$target.find("#submit-button");
     // add tooltip to submit button
-    var submit_tooltip = new bootstrap.Tooltip(submit_button);
+    const submit_tooltip = new bootstrap.Tooltip(submit_button);
     // add click event listener
     submit_button.on("click", () => {
       // hide tooltip
@@ -243,9 +243,9 @@ class Shortcut {
     });
 
     // add click event listener to cancel button
-    var cancel_button = this.$target.find("#cancel-button");
+    const cancel_button = this.$target.find("#cancel-button");
     // add tooltip to cancel button
-    var cancel_tooltip = new bootstrap.Tooltip(cancel_button);
+    const cancel_tooltip = new bootstrap.Tooltip(cancel_button);
     // add click event listener
     cancel_button.on("click", () => {
       // cancel editing the shortcut
@@ -267,9 +267,9 @@ class Shortcut {
     } else {
       this.$target.find("#delete-button").attr("disabled", false);
       // add click event listener to delete button
-      var delete_button = this.$target.find("#delete-button");
+      const delete_button = this.$target.find("#delete-button");
       // add tooltip to delete button
-      var delete_tooltip = new bootstrap.Tooltip(delete_button);
+      const delete_tooltip = new bootstrap.Tooltip(delete_button);
       // add click event listener
       delete_button.on("click", () => {
         // hide tooltip
@@ -389,6 +389,26 @@ class ShortcutList {
       }
     );
     this.command_tooltips_active = false;
+
+    // create fuse object
+    this.fuse = new Fuse(this.shortcuts, {
+      isCaseSensitive: false,
+      keys: [
+        {
+          name: "key",
+          weight: 0.7,
+        },
+        {
+          name: "title",
+          weight: 0.5,
+        },
+        {
+          name: "url",
+          weight: 0.3,
+        },
+      ],
+    });
+
     this.append_list(shortcuts);
   }
 
@@ -436,6 +456,7 @@ class ShortcutList {
         animation: false,
       }
     );
+    this.fuse.setCollection(this.shortcuts);
   }
 
   /**
@@ -524,10 +545,12 @@ class ShortcutList {
    */
   render_filtered(filter) {
     this.reset_active();
-    // filter shortcuts
-    const filtered_shortcuts = this.shortcuts.filter((shortcut) => {
-      return shortcut.key.toUpperCase().startsWith(filter.toUpperCase());
-    });
+    // if the filter is empty, render all shortcuts
+    let filtered_shortcuts = this.shortcuts;
+    if (!(filter === "")) {
+      // filter shortcuts, return the array as a list of the item in the array
+      filtered_shortcuts = this.fuse.search(filter).map((item) => item.item);
+    }
     // render shortcuts
     this.$target.empty();
     this.viewable_shortcuts = [];
@@ -556,9 +579,9 @@ class ShortcutList {
    */
   hide_keyboard_commands() {
     // hide all tooltips
-    this.command_tooltips["add_current_page"].hide();
-    this.command_tooltips["add_new_page"].hide();
-    this.command_tooltips["keyboard_shortcut"].hide();
+    this.command_tooltips.add_current_page.hide();
+    this.command_tooltips.add_new_page.hide();
+    this.command_tooltips.keyboard_shortcut.hide();
     for (const key in this.command_tooltips.edit_buttons) {
       this.command_tooltips.edit_buttons[key].hide();
     }
@@ -571,9 +594,9 @@ class ShortcutList {
    */
   show_keyboard_commands() {
     // show all tooltips
-    this.command_tooltips["add_current_page"].show();
-    this.command_tooltips["add_new_page"].show();
-    this.command_tooltips["keyboard_shortcut"].show();
+    this.command_tooltips.add_current_page.show();
+    this.command_tooltips.add_new_page.show();
+    this.command_tooltips.keyboard_shortcut.show();
 
     // show current selected shortcut edit tooltip if there is one selected
     if (this.active_index !== -1) {
@@ -622,7 +645,7 @@ function render(shortcuts) {
 
   //? Add event listener
   // listen for keydown events on the input element for shortcuts
-  $("#shortcut").on("keydown", function (e) {
+  $("#shortcut").on("keydown", (e) => {
     // check if the keyboard shortcuts are visible
     if (shortcut_list.command_tooltips_active) {
       // catch keyboard shortcuts
@@ -656,7 +679,7 @@ function render(shortcuts) {
         return false;
       }
     }
-    if (e.key == "Alt") {
+    if (e.key === "Alt") {
       // open the view shortcut panel
       shortcut_list.show_keyboard_commands();
       return false;
@@ -678,7 +701,7 @@ function render(shortcuts) {
   });
 
   // listen on focus lost on #shortcut
-  $("#shortcut").on("blur", function (e) {
+  $("#shortcut").on("blur", (e) => {
     // hide keyboard commands
     shortcut_list.hide_keyboard_commands();
   });
@@ -731,7 +754,7 @@ function render(shortcuts) {
     // render shortcut
     shortcut_object.render_edit();
     // get current tab
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       // set url to current tab
       shortcut_object.url = tabs[0].url;
       shortcut_object.title = tabs[0].title;
@@ -749,7 +772,7 @@ function render(shortcuts) {
 
   // listen for click events on the export button
   $("#export-shortcuts").on("click", () => {
-    var request = {
+    const request = {
       target: "background-settings",
       name: "load",
     };
@@ -775,15 +798,15 @@ function render(shortcuts) {
     console.log(e);
     const file = e.target.files[0];
 
-    let reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = (e) => {
       const fileContents = e.target.result;
       try {
         const import_shortcut_keys = JSON.parse(fileContents);
         console.log(import_shortcut_keys);
-        import_shortcut_keys.forEach((shortcutKey) => {
+        for (const shortcutKey of import_shortcut_keys) {
           // make request to backend to add shortcut
-          var request = {
+          const request = {
             target: "background-settings",
             name: "update",
             settings: {
@@ -795,7 +818,7 @@ function render(shortcuts) {
             },
           };
           chrome.runtime.sendMessage(request, () => {});
-        });
+        }
       } catch (error) {
         console.log(error);
         alert("Could not import due to invalid format.");
@@ -813,27 +836,30 @@ function render(shortcuts) {
   });
 
   // listen for input events on the input element for shortcuts
-  $("#shortcut").on("input", function (e) {
+  $("#shortcut").on("input", (e) => {
     // filter shortcuts
     shortcut_list.render_filtered(e.target.value);
   });
 
   // create tooltip for add current page button
-  var add_current_page_tooltip = new bootstrap.Tooltip($("#add_current_page"), {
-    title: "Add current page",
-    placement: "bottom",
-    trigger: "hover",
-    animation: false,
-  });
+  const add_current_page_tooltip = new bootstrap.Tooltip(
+    $("#add_current_page"),
+    {
+      title: "Add current page",
+      placement: "bottom",
+      trigger: "hover",
+      animation: false,
+    }
+  );
   // create tooltip for add new page button
-  var add_new_page_tooltip = new bootstrap.Tooltip($("#new_page"), {
+  const add_new_page_tooltip = new bootstrap.Tooltip($("#new_page"), {
     title: "Add new page",
     placement: "bottom",
     trigger: "hover",
     animation: false,
   });
   // create tooltip for keyboard shortcut button
-  var keyboard_shortcut_tooltip = new bootstrap.Tooltip(
+  const keyboard_shortcut_tooltip = new bootstrap.Tooltip(
     $("#keyboard_shortcut"),
     {
       title: "Keyboard shortcuts",
@@ -843,27 +869,33 @@ function render(shortcuts) {
     }
   );
   // create tooltip for export shortcut button
-  var export_shortcut_tooltip = new bootstrap.Tooltip($("#export-shortcuts"), {
-    title: "Export shortcuts",
-    placement: "left",
-    trigger: "hover",
-    animation: false,
-  });
+  const export_shortcut_tooltip = new bootstrap.Tooltip(
+    $("#export-shortcuts"),
+    {
+      title: "Export shortcuts",
+      placement: "left",
+      trigger: "hover",
+      animation: false,
+    }
+  );
   // create tooltip for import shortcut button
-  var import_shortcut_tooltip = new bootstrap.Tooltip($("#import-shortcuts"), {
-    title: "Import shortcuts",
-    placement: "left",
-    trigger: "hover",
-    animation: false,
-  });
+  const import_shortcut_tooltip = new bootstrap.Tooltip(
+    $("#import-shortcuts"),
+    {
+      title: "Import shortcuts",
+      placement: "left",
+      trigger: "hover",
+      animation: false,
+    }
+  );
 }
 
 // while response does not contain shortcut_keys, try again
-var shortcut_keys = [];
+let shortcut_keys = [];
 
-var tries = 0;
-var max_tries = 10;
-var interval = setInterval(() => {
+let tries = 0;
+const max_tries = 10;
+const interval = setInterval(() => {
   chrome.runtime.sendMessage(
     { target: "background-settings", name: "load" },
     (response) => {
