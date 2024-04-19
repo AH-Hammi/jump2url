@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Jump2url",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Simple extension to jump to a url by a shortcut in a popup",
   "icons": {
     "64": "icons/icon_64.png",
@@ -14,6 +14,6 @@
     "default_title": "Jump2url",
     "default_popup": "popup/popup.html"
   },
-  "permissions": ["storage", "tabs"],
+  "permissions": ["bookmarks", "tabs"],
   "default_locale": "en"
 }
