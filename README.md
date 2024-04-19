@@ -6,13 +6,9 @@ This chrome extension provides the ability to jump to a url by typing a keyword.
 2. [Features](#features)
 3. [Jump2Url](#jump2url)
 4. [Navigation](#navigation)
-5. [Using the hotkeys](#using-the-hotkeys)
-6. [Create a new shortcut](#create-a-new-shortcut)
-7. [Add current page as shortcut](#add-current-page-as-shortcut)
-8. [The edit page](#the-edit-page)
-9. [Storage Location](#storage-location)
-10. [Export and Import](#export-and-import)
-11. [Contribution](#contribution)
+5. [Searching](#searching)
+6. [How to add a shortcut](#how-to-add-a-shortcut)
+7. [Contribution](#contribution)
 
 ## Usage
 
@@ -30,12 +26,6 @@ This extension provides the following features:
 <!-- no toc -->
 - [Jump to a url](#jump2url)
 - [Navigate with keyboard](#navigation)
-- Full keyboard support. [Including Hotkeys](#using-the-hotkeys)
-- [Create custom shortcuts](#create-a-new-shortcut)
-- [Add Current page as shortcut](#add-current-page-as-shortcut)
-- [Edit existing shortcuts](#the-edit-page)
-- [Save shortcuts either to local storage or in sync storage](#storage-location)
-- [Export and Import](#export-and-import) shortcuts
 
 ## Jump2Url
 
@@ -56,54 +46,30 @@ You can navigate the list with the arrow keys.
 
 You can start the selected page with the enter key.
 
-## Using the hotkeys
+## Searching
 
-To use the hotkeys you need to have focus on the input field.
+You can search for a shortcut by typing in the input field.
 
-Then you need to press "ALT" and you will see all possible Hotkeys from there.
+The search is a fuzzy search that matches against key, title and url
 
-With "A" you can call the add current page feature.
+## How to add a shortcut
 
-With "N" you can create a new shortcut.
+All shortcuts are created from your bookmarks.
 
-With "E" you can edit the selected shortcut.
+The Key is always all uppercase letters of the bookmark.
 
-With "K" you can open the settings page to the keyboard shortcuts from chrome.
+Only bookmarks with at least one uppercase letter are considered, the rest is ignored and not shown in the popup.
 
-## Create a new shortcut
+To make this a bit clearer, here is an example:
 
-You can create a new shortcut by clicking on the "New" button in the popup.
+Bookmark title: `YouTube Music`
 
-## Add current page as shortcut
-
-You can add the current page as shortcut by clicking on the "Add Current Page" button in the popup.
-
-This will automatically fill the url and the title.
-
-Furthermore it will try to fill the keyword with the titles uppercase letters.
-
-## The edit page
-
-When you edit a shortcut you can change the following things:
-
-- Keyword
-- Title
-- Url
-- Storage Location
-
-## Storage Location
-
-The Storage Location is either local or sync.  
-Offline means local  
-Online means sync
-
-## Export and Import
-
-You can export and import your shortcuts.  
-Therefore you can edit them in bulk in case you want to change the storage location. For example.
-But you should be careful when importing, because it will overwrite all existing shortcuts with the same key.  
-Furthermore it doesn't validate if the key is unique.
+The key would be `YTM`
 
 ## Contribution
+
+For contribution please make sure to use the following tools:
+
+- [biome](https://biomejs.dev/) As your formatting tool and linter
 
 Suggestions and pull requests are welcomed!.
