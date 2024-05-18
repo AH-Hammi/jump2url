@@ -44,4 +44,19 @@ Settings.newAsync().then((settings) => {
 	chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
 		settings.reload();
 	});
+	chrome.bookmarks.onChildrenReordered.addListener(() => {
+		settings.reload();
+	});
+	chrome.bookmarks.onCreated.addListener(() => {
+		settings.reload();
+	});
+	chrome.bookmarks.onMoved.addListener(() => {
+		settings.reload();
+	});
+	chrome.bookmarks.onRemoved.addListener(() => {
+		settings.reload();
+	});
+	chrome.bookmarks.onImportEnded.addListener(() => {
+		settings.reload();
+	});
 });
