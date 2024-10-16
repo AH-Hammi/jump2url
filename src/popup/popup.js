@@ -1,7 +1,5 @@
 /**
  * Shortcut class
- *
- * @class
  */
 class Shortcut {
 	// keep track of how many instances have been created
@@ -11,7 +9,7 @@ class Shortcut {
 	 * Constructor function for creating an instance of the class.
 	 *
 	 * @param {data} data - The data object containing the properties for the instance.
-	 * @param {jQuery} $target - The target element where the instance will be rendered.
+	 * @param {Element} $target - The target element where the instance will be rendered.
 	 * @param {string} $view_template - The HTML template for the view mode of the instance.
 	 * @param {string} $edit_template - The HTML template for the edit mode of the instance.
 	 */
@@ -20,9 +18,23 @@ class Shortcut {
 		this.url = data.url;
 		this.key = data.key;
 		this.$target = $target;
-		this.$view_template = $view_template;
 		this.id = Shortcut.count;
 		Shortcut.count++;
+		this.setup_view_template($view_template, data.key, data.title);
+	}
+
+	/**
+	 * Setup the view template
+	 */
+	setup_view_template(view_template, key, title) {
+		this.$view_template = view_template;
+		this.$view_template.querySelector(".key").textContent = key;
+		this.$view_template.querySelector(".title").textContent = title;
+		// add click event listener
+		this.$view_template.addEventListener("click", () => {
+			this.jump();
+			return false;
+		});
 	}
 
 	/**
@@ -46,16 +58,10 @@ class Shortcut {
 	 * @return {void} No return value.
 	 */
 	render_view() {
-		this.$target.empty();
-		// clone template
-		this.$target.append(this.$view_template);
-		this.$view_template.find(".key").text(this.key);
-		this.$view_template.find(".title").text(this.title);
-		// add click event listener
-		this.$view_template.on("click", () => {
-			this.jump();
-			return false;
-		});
+		while (this.$target.firstChild) {
+			this.$target.removeChild(this.$target.firstChild);
+		}
+		this.$target.appendChild(this.$view_template);
 	}
 
 	/**
@@ -64,7 +70,7 @@ class Shortcut {
 	 * @return {void}
 	 */
 	set_active() {
-		this.$view_template.addClass("active");
+		this.$view_template.classList.add("active");
 	}
 
 	/**
@@ -73,7 +79,7 @@ class Shortcut {
 	 * @return {void}
 	 */
 	set_inactive() {
-		this.$view_template.removeClass("active");
+		this.$view_template.classList.remove("active");
 	}
 }
 
@@ -82,7 +88,7 @@ class ShortcutList {
 	/**
 	 * Initializes a new instance of the Constructor class.
 	 *
-	 * @param {Object} $target - The target element.
+	 * @param {Element} $target - The target element.
 	 * @param {Array} shortcuts - The array of shortcuts.
 	 */
 	constructor($target, shortcuts) {
@@ -120,7 +126,7 @@ class ShortcutList {
 	 */
 	append(shortcut) {
 		this._append(shortcut);
-		this.render_filtered($("#shortcut").val());
+		this.render_filtered(document.getElementById("shortcut"));
 	}
 
 	/**
@@ -133,7 +139,7 @@ class ShortcutList {
 			this._append(shortcut);
 		}
 		// render filtered shortcuts
-		this.render_filtered($("#shortcut").val());
+		this.render_filtered(document.getElementById("shortcut"));
 	}
 
 	/**
@@ -144,7 +150,7 @@ class ShortcutList {
 	_append(shortcut) {
 		this.shortcuts.push(shortcut);
 		this.viewable_shortcuts.push(shortcut);
-		this.$target.append(shortcut.$target);
+		this.$target.appendChild(shortcut.$target);
 		// render shortcut
 		shortcut.render_view();
 		this.fuse.setCollection(this.shortcuts);
@@ -243,11 +249,13 @@ class ShortcutList {
 			filtered_shortcuts = this.fuse.search(filter).map((item) => item.item);
 		}
 		// render shortcuts
-		this.$target.empty();
+		while (this.$target.firstChild) {
+			this.$target.removeChild(this.$target.firstChild);
+		}
 		this.viewable_shortcuts = [];
 		for (const shortcut of filtered_shortcuts) {
 			shortcut.render_view();
-			this.$target.append(shortcut.$target);
+			this.$target.appendChild(shortcut.$target);
 			this.viewable_shortcuts.push(shortcut);
 		}
 		// set first shortcut as active0
@@ -266,20 +274,6 @@ class ShortcutList {
 	}
 }
 
-const $shortcut_list = $("#shortcut-list");
-
-//? Load list item template
-const $li_template = $("#template-shortcut-li");
-// remove template from DOM
-$li_template.attr("id", "");
-$li_template.remove();
-
-//? Load view template
-const $view_template = $("#template-view");
-// remove template from DOM
-$view_template.attr("id", "");
-$view_template.remove();
-
 function render(shortcuts) {
 	//? Render shortcuts
 	const shortcut_list = new ShortcutList(
@@ -287,39 +281,66 @@ function render(shortcuts) {
 		shortcuts.map((shortcut) => {
 			return new Shortcut(
 				shortcut,
-				$li_template.clone(),
-				$view_template.clone(),
+				// $li_template.clone(),
+				$li_template.cloneNode(true),
+				// $view_template.clone(),
+				$view_template.cloneNode(true),
 			);
 		}),
 	);
 
-	//? Add event listener
+	//? Add event listeners
 	// listen for keydown events on the input element for shortcuts
-	$("#shortcut").on("keydown", (e) => {
+	const $shortcut = document.getElementById("shortcut");
+
+	$shortcut.addEventListener("keydown", (e) => {
 		if (e.key === "Enter") {
 			// open the selected shortcut
 			shortcut_list.jump_selected();
 			return false;
 		}
 		if (e.key === "ArrowUp") {
-			shortcut_list.previous($("#shortcut"));
+			// shortcut_list.previous($("#shortcut"));
+			shortcut_list.previous($shortcut);
 			return false;
 		}
 		if (e.key === "ArrowDown") {
-			shortcut_list.next($("#shortcut"));
+			// shortcut_list.next($("#shortcut"));
+			shortcut_list.next($shortcut);
 			return false;
 		}
 	});
 
 	// listen for input events on the input element for shortcuts
-	$("#shortcut").on("input", (e) => {
+	// $("#shortcut").on("input", (e) => {
+	$shortcut.addEventListener("input", (e) => {
 		// filter shortcuts
 		shortcut_list.render_filtered(e.target.value);
 	});
+
+	shortcut_list.render_filtered($shortcut.value);
 }
+
+const $shortcut_list = document.getElementById("shortcut-list");
+
+//? Load list item template
+const $li_template = document.getElementById("template-shortcut-li");
+
+// remove template from DOM
+$li_template.setAttribute("id", "");
+$li_template.remove();
+
+//? Load view template
+const $view_template = document.getElementById("template-view");
+// remove template from DOM
+$view_template.setAttribute("id", "");
+$view_template.remove();
 
 // while response does not contain shortcut_keys, try again
 let bookmarks = [];
+
+// Focus to the input element
+document.getElementById("shortcut").focus();
 
 let tries = 0;
 const max_tries = 10;
@@ -341,6 +362,3 @@ const interval = setInterval(() => {
 		},
 	);
 }, 100);
-
-// Focus to the input element
-document.getElementById("shortcut").focus();

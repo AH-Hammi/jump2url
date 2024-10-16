@@ -1,32 +1,32 @@
 body {
-  min-width: 300px;
+	min-width: 300px;
 }
 
 .item-container {
-  overflow-x: hidden;
-  max-height: 400px;
+	overflow-x: hidden;
+	max-height: 400px;
 }
 
 label:has(> .no-option) {
-  position: relative;
+	position: relative;
 }
 
 /* Layer is behind the knobs, depending on the checkbox with the color red*/
 .layer {
-  position: absolute;
-  left: 0px;
-  z-index: 1;
-  border-radius: var(--bs-border-radius);
+	position: absolute;
+	left: 0px;
+	z-index: 1;
+	border-radius: var(--bs-border-radius);
 }
 
 .no-option {
-  position: relative;
-  top: 0px;
-  z-index: 2;
+	position: relative;
+	top: 0px;
+	z-index: 2;
 }
 
 .yes-option {
-  position: relative;
-  top: 0px;
-  z-index: 2;
+	position: relative;
+	top: 0px;
+	z-index: 2;
 }
