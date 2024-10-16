@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Jump2url",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Simple extension to jump to a url by a shortcut in a popup",
   "icons": {
     "64": "icons/icon_64.png",
