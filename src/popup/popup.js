@@ -2,7 +2,7 @@
  * Shortcut class
  */
 class Shortcut {
-	// keep track of how many instances have been created
+	// Keep track of how many instances have been created
 	static count = 0;
 
 	/**
@@ -30,7 +30,7 @@ class Shortcut {
 		this.$view_template = view_template;
 		this.$view_template.querySelector(".key").textContent = key;
 		this.$view_template.querySelector(".title").textContent = title;
-		// add click event listener
+		// Add click event listener
 		this.$view_template.addEventListener("click", () => {
 			this.jump();
 			return false;
@@ -43,7 +43,7 @@ class Shortcut {
 	 * @return {void} No return value.
 	 */
 	jump() {
-		// open the url
+		// Open the url
 		chrome.runtime.sendMessage(
 			{ target: "background-jump", name: "jump", url: this.url },
 			() => {
@@ -83,7 +83,7 @@ class Shortcut {
 	}
 }
 
-// a list over all shortcuts holding the ul element as well as all shortcut elements
+// A list over all shortcuts holding the HTML elements
 class ShortcutList {
 	/**
 	 * Initializes a new instance of the Constructor class.
@@ -97,7 +97,7 @@ class ShortcutList {
 		this.active_index = -1;
 		this.viewable_shortcuts = [];
 
-		// create fuse object
+		// Create fuse object
 		this.fuse = new Fuse(this.shortcuts, {
 			isCaseSensitive: false,
 			keys: [
@@ -138,7 +138,7 @@ class ShortcutList {
 		for (const shortcut of shortcuts) {
 			this._append(shortcut);
 		}
-		// render filtered shortcuts
+		// Render filtered shortcuts
 		this.render_filtered(document.getElementById("shortcut"));
 	}
 
@@ -151,7 +151,7 @@ class ShortcutList {
 		this.shortcuts.push(shortcut);
 		this.viewable_shortcuts.push(shortcut);
 		this.$target.appendChild(shortcut.$target);
-		// render shortcut
+		// Render shortcut
 		shortcut.render_view();
 		this.fuse.setCollection(this.shortcuts);
 	}
@@ -173,11 +173,11 @@ class ShortcutList {
 	 * @param {number} index - The index of the shortcut to set as active.
 	 */
 	set_active(index) {
-		// check if index is valid
+		// Check if index is valid
 		if (index < 0 || index >= this.viewable_shortcuts.length) {
 			return;
 		}
-		// reset active shortcut
+		// Reset active shortcut
 		this.reset_active();
 		this.viewable_shortcuts[index].set_active();
 		this.active_index = index;
@@ -192,7 +192,7 @@ class ShortcutList {
 		if (this.viewable_shortcuts.length === 0) {
 			return;
 		}
-		// check if a shortcut is already active
+		// Check if a shortcut is already active
 		if (this.active_index !== -1) {
 			this.viewable_shortcuts[this.active_index].set_inactive();
 		}
@@ -206,13 +206,13 @@ class ShortcutList {
 	 */
 	next() {
 		const next_index = (this.active_index + 1) % this.viewable_shortcuts.length;
-		// scroll down if the next shortcut is not visible
-		this.viewable_shortcuts[next_index].$target[0].scrollIntoView({
+		// Scroll down if the next shortcut is not visible
+		this.viewable_shortcuts[next_index].$target.scrollIntoView({
 			block: "nearest",
 			inline: "nearest",
 			behavior: "instant",
 		});
-		// set the new shortcut as active
+		// Set the new shortcut as active
 		this.set_active(next_index);
 	}
 
@@ -225,13 +225,13 @@ class ShortcutList {
 		const previous_index =
 			(this.active_index - 1 + this.viewable_shortcuts.length) %
 			this.viewable_shortcuts.length;
-		// scroll up if the previous shortcut is not visible
-		this.viewable_shortcuts[previous_index].$target[0].scrollIntoView({
+		// Scroll up if the previous shortcut is not visible
+		this.viewable_shortcuts[previous_index].$target.scrollIntoView({
 			block: "nearest",
 			inline: "nearest",
 			behavior: "instant",
 		});
-		// set the new shortcut as active
+		// Set the new shortcut as active
 		this.set_active(previous_index);
 	}
 
@@ -242,13 +242,13 @@ class ShortcutList {
 	 */
 	render_filtered(filter) {
 		this.reset_active();
-		// if the filter is empty, render all shortcuts
+		// If the filter is empty, render all shortcuts
 		let filtered_shortcuts = this.shortcuts;
 		if (!(filter === "")) {
-			// filter shortcuts, return the array as a list of the item in the array
+			// Filter shortcuts, return the array as a list of the item in the array
 			filtered_shortcuts = this.fuse.search(filter).map((item) => item.item);
 		}
-		// render shortcuts
+		// Render shortcuts
 		while (this.$target.firstChild) {
 			this.$target.removeChild(this.$target.firstChild);
 		}
@@ -258,15 +258,15 @@ class ShortcutList {
 			this.$target.appendChild(shortcut.$target);
 			this.viewable_shortcuts.push(shortcut);
 		}
-		// set first shortcut as active0
+		// Set first shortcut as active0
 		this.set_active(0);
 	}
 
 	/**
-	 * jump_selected function - Checks if there is a selected shortcut and jumps to it.
+	 * Jump_selected function - Checks if there is a selected shortcut and jumps to it.
 	 */
 	jump_selected() {
-		// check if there is a selected shortcut
+		// Check if there is a selected shortcut
 		if (this.active_index === -1) {
 			return;
 		}
@@ -281,40 +281,35 @@ function render(shortcuts) {
 		shortcuts.map((shortcut) => {
 			return new Shortcut(
 				shortcut,
-				// $li_template.clone(),
 				$li_template.cloneNode(true),
-				// $view_template.clone(),
 				$view_template.cloneNode(true),
 			);
 		}),
 	);
 
 	//? Add event listeners
-	// listen for keydown events on the input element for shortcuts
+	// listen for letdown events on the input element for shortcuts
 	const $shortcut = document.getElementById("shortcut");
 
 	$shortcut.addEventListener("keydown", (e) => {
 		if (e.key === "Enter") {
-			// open the selected shortcut
+			// Open the selected shortcut
 			shortcut_list.jump_selected();
 			return false;
 		}
 		if (e.key === "ArrowUp") {
-			// shortcut_list.previous($("#shortcut"));
 			shortcut_list.previous($shortcut);
 			return false;
 		}
 		if (e.key === "ArrowDown") {
-			// shortcut_list.next($("#shortcut"));
 			shortcut_list.next($shortcut);
 			return false;
 		}
 	});
 
-	// listen for input events on the input element for shortcuts
-	// $("#shortcut").on("input", (e) => {
+	// Listen for input events on the input element for shortcuts
 	$shortcut.addEventListener("input", (e) => {
-		// filter shortcuts
+		// Filter shortcuts
 		shortcut_list.render_filtered(e.target.value);
 	});
 
@@ -326,17 +321,17 @@ const $shortcut_list = document.getElementById("shortcut-list");
 //? Load list item template
 const $li_template = document.getElementById("template-shortcut-li");
 
-// remove template from DOM
+// Remove template from DOM
 $li_template.setAttribute("id", "");
 $li_template.remove();
 
 //? Load view template
 const $view_template = document.getElementById("template-view");
-// remove template from DOM
+// Remove template from DOM
 $view_template.setAttribute("id", "");
 $view_template.remove();
 
-// while response does not contain shortcut_keys, try again
+// While response does not contain shortcut_keys, try again
 let bookmarks = [];
 
 // Focus to the input element
