@@ -207,7 +207,7 @@ class ShortcutList {
 	next() {
 		const next_index = (this.active_index + 1) % this.viewable_shortcuts.length;
 		// Scroll down if the next shortcut is not visible
-		this.viewable_shortcuts[next_index].$target[0].scrollIntoView({
+		this.viewable_shortcuts[next_index].$target.scrollIntoView({
 			block: "nearest",
 			inline: "nearest",
 			behavior: "instant",
@@ -226,7 +226,7 @@ class ShortcutList {
 			(this.active_index - 1 + this.viewable_shortcuts.length) %
 			this.viewable_shortcuts.length;
 		// Scroll up if the previous shortcut is not visible
-		this.viewable_shortcuts[previous_index].$target[0].scrollIntoView({
+		this.viewable_shortcuts[previous_index].$target.scrollIntoView({
 			block: "nearest",
 			inline: "nearest",
 			behavior: "instant",
