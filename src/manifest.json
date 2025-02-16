@@ -12,8 +12,17 @@
     "type": "module"
   },
   "action": {
+    "default_icon": "icons/icon_64.png",
     "default_title": "Jump2url",
     "default_popup": "popup/popup.html"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Period",
+        "mac": "Command+Period"
+      }
+    }
   },
   "permissions": ["bookmarks", "tabs"],
   "default_locale": "en"
