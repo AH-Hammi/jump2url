@@ -181,6 +181,12 @@ class ShortcutList {
 		this.reset_active();
 		this.viewable_shortcuts[index].set_active();
 		this.active_index = index;
+		// Scroll up if the previous shortcut is not visible
+		this.viewable_shortcuts[index].$target.scrollIntoView({
+			block: "nearest",
+			inline: "nearest",
+			behavior: "instant",
+		});
 	}
 
 	/**
@@ -206,12 +212,6 @@ class ShortcutList {
 	 */
 	next() {
 		const next_index = (this.active_index + 1) % this.viewable_shortcuts.length;
-		// Scroll down if the next shortcut is not visible
-		this.viewable_shortcuts[next_index].$target.scrollIntoView({
-			block: "nearest",
-			inline: "nearest",
-			behavior: "instant",
-		});
 		// Set the new shortcut as active
 		this.set_active(next_index);
 	}
@@ -225,12 +225,6 @@ class ShortcutList {
 		const previous_index =
 			(this.active_index - 1 + this.viewable_shortcuts.length) %
 			this.viewable_shortcuts.length;
-		// Scroll up if the previous shortcut is not visible
-		this.viewable_shortcuts[previous_index].$target.scrollIntoView({
-			block: "nearest",
-			inline: "nearest",
-			behavior: "instant",
-		});
 		// Set the new shortcut as active
 		this.set_active(previous_index);
 	}
@@ -334,9 +328,6 @@ $view_template.remove();
 // While response does not contain shortcut_keys, try again
 let bookmarks = [];
 
-// Focus to the input element
-document.getElementById("shortcut").focus();
-
 let tries = 0;
 const max_tries = 10;
 const interval = setInterval(() => {
@@ -357,3 +348,8 @@ const interval = setInterval(() => {
 		},
 	);
 }, 100);
+
+// Focus on the input element on key down actions
+document.onkeydown = (e) => {
+	document.getElementById("shortcut").focus();
+};
