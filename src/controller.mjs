@@ -1,4 +1,4 @@
-importScripts("settings.js");
+import Settings from "./settings.js";
 
 function jump2url(url) {
 	// First, search from the current window.
@@ -44,9 +44,9 @@ Settings.newAsync().then((settings) => {
 	chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
 		settings.reload();
 	});
-	chrome.bookmarks.onChildrenReordered.addListener(() => {
-		settings.reload();
-	});
+	// chrome.bookmarks.onChildrenReordered.addListener(() => {
+	// 	settings.reload();
+	// });
 	chrome.bookmarks.onCreated.addListener(() => {
 		settings.reload();
 	});
@@ -56,7 +56,7 @@ Settings.newAsync().then((settings) => {
 	chrome.bookmarks.onRemoved.addListener(() => {
 		settings.reload();
 	});
-	chrome.bookmarks.onImportEnded.addListener(() => {
-		settings.reload();
-	});
+	// chrome.bookmarks.onImportEnded.addListener(() => {
+	// 	settings.reload();
+	// });
 });
