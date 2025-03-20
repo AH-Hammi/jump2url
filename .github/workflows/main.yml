@@ -1,5 +1,6 @@
 name: "Publish to Firefox and Chrome"
-on: workflow_dispatch
+on: 
+  push
 jobs:
   build:
     name: "Build"
