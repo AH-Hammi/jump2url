@@ -15,11 +15,16 @@ jobs:
         with:
           cmd: build
           source: src
-          filename: "{name}-{version}.xpi"
-          ignoreFiles: '[ "package.json","package-lock.json","yarn.lock" ]'
+          
+      - name: "Collect sources"
+        run: git archive --format=zip --output=sources.zip ${{ github.ref }}
+
+      - name: "Collect metadata"
+        id: metadata
+        run: echo "json=$(jq -c . < amo_metadata.json)" >> $GITHUB_OUTPUT
 
       - name: "Upload Artifact"
         uses: actions/upload-artifact@v4
         with:
-          name: target.xpi
+          name: aritfacts
           path: ${{ steps.web-ext-build.outputs.target }}
