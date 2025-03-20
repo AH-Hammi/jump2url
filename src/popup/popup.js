@@ -20,16 +20,18 @@ class Shortcut {
 		this.$target = $target;
 		this.id = Shortcut.count;
 		Shortcut.count++;
-		this.setup_view_template($view_template, data.key, data.title);
+		this.setup_view_template($view_template, data.key, data.title, data.url);
 	}
 
 	/**
 	 * Setup the view template
 	 */
-	setup_view_template(view_template, key, title) {
+	setup_view_template(view_template, key, title, url) {
 		this.$view_template = view_template;
 		this.$view_template.querySelector(".key").textContent = key;
 		this.$view_template.querySelector(".title").textContent = title;
+		// Set the title attribute of the view template
+		this.$view_template.setAttribute("title", url);
 		// Add click event listener
 		this.$view_template.addEventListener("click", () => {
 			this.jump();
@@ -181,6 +183,12 @@ class ShortcutList {
 		this.reset_active();
 		this.viewable_shortcuts[index].set_active();
 		this.active_index = index;
+		// Scroll up if the previous shortcut is not visible
+		this.viewable_shortcuts[index].$target.scrollIntoView({
+			block: "nearest",
+			inline: "nearest",
+			behavior: "instant",
+		});
 	}
 
 	/**
@@ -206,12 +214,6 @@ class ShortcutList {
 	 */
 	next() {
 		const next_index = (this.active_index + 1) % this.viewable_shortcuts.length;
-		// Scroll down if the next shortcut is not visible
-		this.viewable_shortcuts[next_index].$target.scrollIntoView({
-			block: "nearest",
-			inline: "nearest",
-			behavior: "instant",
-		});
 		// Set the new shortcut as active
 		this.set_active(next_index);
 	}
@@ -225,12 +227,6 @@ class ShortcutList {
 		const previous_index =
 			(this.active_index - 1 + this.viewable_shortcuts.length) %
 			this.viewable_shortcuts.length;
-		// Scroll up if the previous shortcut is not visible
-		this.viewable_shortcuts[previous_index].$target.scrollIntoView({
-			block: "nearest",
-			inline: "nearest",
-			behavior: "instant",
-		});
 		// Set the new shortcut as active
 		this.set_active(previous_index);
 	}
@@ -334,9 +330,6 @@ $view_template.remove();
 // While response does not contain shortcut_keys, try again
 let bookmarks = [];
 
-// Focus to the input element
-document.getElementById("shortcut").focus();
-
 let tries = 0;
 const max_tries = 10;
 const interval = setInterval(() => {
@@ -344,7 +337,7 @@ const interval = setInterval(() => {
 		{ target: "background-settings", name: "load" },
 		(response) => {
 			console.log(response);
-			if (response.bookmarks) {
+			if (response.bookmarks.length > 0) {
 				bookmarks = response.bookmarks;
 				clearInterval(interval);
 				render(bookmarks);
@@ -357,3 +350,8 @@ const interval = setInterval(() => {
 		},
 	);
 }, 100);
+
+// Focus on the input element on key down actions
+document.onkeydown = (e) => {
+	document.getElementById("shortcut").focus();
+};
