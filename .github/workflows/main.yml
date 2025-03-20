@@ -1,0 +1,50 @@
+name: "Publish to Firefox and Chrome"
+on:
+  release:
+    types: [published]
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "web-ext build"
+        id: web-ext-build
+        uses: kewisch/action-web-ext@v1
+        with:
+          cmd: build
+          source: src
+          
+      - name: "Collect sources"
+        run: git archive --format=zip --output=sources.zip ${{ github.ref }}
+
+      - name: "Collect metadata"
+        id: metadata
+        run: echo "json=$(jq -c . < amo_metadata.json)" >> $GITHUB_OUTPUT
+
+      - name: "Publish to Chrome Web Store"
+        uses: wdzeng/chrome-extension@v1
+        with:
+          extension-id: imlofdcajnkbejdedbljmklcfhdiddjk
+          zip-path: "**/jump2url*.zip"
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+
+      - name: "Publish to Firefox Browser Add-ons"
+        uses: wdzeng/firefox-addon@v1
+        with:
+          addon-guid: alex.hammans@gmail.com
+          xpi-path: "**/jump2url*.zip"
+          self-hosted: false
+          jwt-issuer: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          jwt-secret: ${{ secrets.FIREFOX_JWT_SECRET }}
+
+      - name: "Upload Artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: aritfacts
+          path: ${{ steps.web-ext-build.outputs.target }}
+          
