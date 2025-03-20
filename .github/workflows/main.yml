@@ -23,12 +23,23 @@ jobs:
         id: metadata
         run: echo "json=$(jq -c . < amo_metadata.json)" >> $GITHUB_OUTPUT
 
-      - uses: wdzeng/chrome-extension@v1
+      - name: "Publish to Chrome Web Store"
+        uses: wdzeng/chrome-extension@v1
         with:
+          extension-id: imlofdcajnkbejdedbljmklcfhdiddjk
+          zip-path: "**/jump2url*.zip"
           client-id: ${{ secrets.CHROME_CLIENT_ID }}
           client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
           refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          check-credentials-only: true
+
+      - name: "Publish to Firefox Browser Add-ons"
+        uses: wdzeng/firefox-addon@v1
+        with:
+          addon-guid: alex.hammans@gmail.com
+          xpi-path: "**/jump2url*.zip"
+          self-hosted: false
+          jwt-issuer: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          jwt-secret: ${{ secrets.FIREFOX_JWT_SECRET }}
 
       - name: "Upload Artifact"
         uses: actions/upload-artifact@v4
