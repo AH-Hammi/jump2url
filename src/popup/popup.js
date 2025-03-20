@@ -337,7 +337,7 @@ const interval = setInterval(() => {
 		{ target: "background-settings", name: "load" },
 		(response) => {
 			console.log(response);
-			if (response.bookmarks) {
+			if (response.bookmarks.length > 0) {
 				bookmarks = response.bookmarks;
 				clearInterval(interval);
 				render(bookmarks);
