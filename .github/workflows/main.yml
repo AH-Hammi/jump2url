@@ -23,6 +23,13 @@ jobs:
         id: metadata
         run: echo "json=$(jq -c . < amo_metadata.json)" >> $GITHUB_OUTPUT
 
+      - uses: wdzeng/chrome-extension@v1
+        with:
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          check-credentials-only: true
+
       - name: "Upload Artifact"
         uses: actions/upload-artifact@v4
         with:
