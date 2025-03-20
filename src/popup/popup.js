@@ -20,16 +20,18 @@ class Shortcut {
 		this.$target = $target;
 		this.id = Shortcut.count;
 		Shortcut.count++;
-		this.setup_view_template($view_template, data.key, data.title);
+		this.setup_view_template($view_template, data.key, data.title, data.url);
 	}
 
 	/**
 	 * Setup the view template
 	 */
-	setup_view_template(view_template, key, title) {
+	setup_view_template(view_template, key, title, url) {
 		this.$view_template = view_template;
 		this.$view_template.querySelector(".key").textContent = key;
 		this.$view_template.querySelector(".title").textContent = title;
+		// Set the title attribute of the view template
+		this.$view_template.setAttribute("title", url);
 		// Add click event listener
 		this.$view_template.addEventListener("click", () => {
 			this.jump();
