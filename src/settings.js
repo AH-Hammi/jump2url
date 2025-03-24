@@ -20,7 +20,7 @@ async function load_bookmarks(root) {
 	return bookmarks;
 }
 
-class Settings {
+export default class Settings {
 	static async newAsync() {
 		const settings = new Settings();
 		await settings._load();
