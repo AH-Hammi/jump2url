@@ -3,6 +3,18 @@ import Settings from "./settings.js";
 function jump2url(url) {
 	// First, search from the current window.
 	chrome.tabs.query({ lastFocusedWindow: true }, (tabs) => {
+		// Check if current window is a new tab
+		// Get current selected tab
+		const currentTab = tabs.filter((tab) => tab.active)[0];
+		if (
+			currentTab.url === "chrome://newtab/" ||
+			currentTab.url === "about:blank" ||
+			currentTab.url === "about:newtab"
+		) {
+			chrome.tabs.update(currentTab.id, { url: url }, () => {});
+			return;
+		}
+		// Check if the URL is already open
 		const matchTab = tabs.filter((tab) => {
 			return tab.url.indexOf(url) === 0;
 		})[0];
